@@ -4,6 +4,7 @@
 
 :root {
   --background: #000957;
+  --foreground: #ffffff;
 }
 @font-face {
   font-family: "pixelify-sans-bold";

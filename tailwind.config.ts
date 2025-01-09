@@ -8,7 +8,10 @@ export default {
   ],
   theme: {
     colors: {
-      "bg-primary": "#000957",
+      "BH-primary": "#000957",
+      "white-primary": "#ffffff",
+      "grey-primary": "#EFF3EA",
+      "grey-secondary": "#D0DDD0",
     },
     fontFamily: {
       "pixel-bold": "pixelify-sans-bold",
@@ -19,6 +22,7 @@ export default {
     extend: {
       colors: {
         background: "var(--background)",
+        foreground: "var(--foreground)",
       },
     },
   },
