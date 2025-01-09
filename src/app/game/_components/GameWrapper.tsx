@@ -1,18 +1,32 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import { io, Socket } from "socket.io-client";
 import Grid from "./Grid";
 import CharacterInputPopup from "./CharacterInputPopup";
+
+const socket: Socket = io("http://localhost:3001"); // Connect to the Socket.IO server
 
 const GameWrapper: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>(
     Array.from({ length: 10 }, () => Array(10).fill(""))
   );
-
   const [showPopup, setShowPopup] = useState<boolean>(false); // Popup visibility state
   const [selectedCell, setSelectedCell] = useState<{
     row: number;
     col: number;
   } | null>(null);
+
+  // Listen for grid updates from the server
+  useEffect(() => {
+    socket.on("gridUpdate", (updatedGrid: string[][]) => {
+      setGrid(updatedGrid);
+    });
+
+    return () => {
+      socket.off("gridUpdate");
+    };
+  }, []);
 
   const handleCellClick = (row: number, col: number) => {
     if (!grid[row][col]) {
@@ -24,9 +38,10 @@ const GameWrapper: React.FC = () => {
   const handleCharacterSubmit = (char: string) => {
     if (selectedCell) {
       const { row, col } = selectedCell;
-      const newGrid = [...grid];
-      newGrid[row][col] = char; // Update grid with character
-      setGrid(newGrid);
+
+      // Emit the cell update to the server
+      socket.emit("updateCell", { row, col, char });
+
       setSelectedCell(null); // Reset selected cell
     }
     setShowPopup(false); // Close popup
