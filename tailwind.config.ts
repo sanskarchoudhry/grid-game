@@ -12,6 +12,8 @@ export default {
       "white-primary": "#ffffff",
       "grey-primary": "#EFF3EA",
       "grey-secondary": "#D0DDD0",
+      "grey-tertiary": "#BBC6BB",
+      "red-error": "#F93827",
     },
     fontFamily: {
       "pixel-bold": "pixelify-sans-bold",
