@@ -14,9 +14,15 @@ const GameWrapper: React.FC = () => {
     col: number;
   } | null>(null);
   const [onlinePlayers, setOnlinePlayers] = useState<number>(0); // State for online players
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
+  const [cooldownTime, setCooldownTime] = useState<number>(0); // Cooldown time in seconds
   const ws = useRef<WebSocket | null>(null); // WebSocket instance
+  const playerId = useRef<string | null>(null); // Player ID
 
   useEffect(() => {
+    // Generate a unique playerId for the user (you could also use a random value or session data)
+    playerId.current = Math.random().toString(36).substr(2, 9);
+
     // Establish WebSocket connection
     ws.current = new WebSocket("ws://localhost:3001");
 
@@ -28,6 +34,8 @@ const GameWrapper: React.FC = () => {
         setGrid(data.grid);
       } else if (data.type === "playerCount") {
         setOnlinePlayers(data.count); // Update online player count
+      } else if (data.type === "error") {
+        setErrorMessage(data.message); // Show cooldown error
       }
     };
 
@@ -37,30 +45,56 @@ const GameWrapper: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // If cooldownTime is greater than 0, start the timer
+    if (cooldownTime > 0) {
+      const timerInterval = setInterval(() => {
+        setCooldownTime((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(timerInterval); // Stop the timer when it reaches 0
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000); // Decrease the time every second
+
+      // Cleanup the interval on component unmount
+      return () => clearInterval(timerInterval);
+    }
+  }, [cooldownTime]);
+
   const handleCellClick = (row: number, col: number) => {
-    if (!grid[row][col]) {
+    if (cooldownTime > 0) {
+      // If the user tries to click during cooldown, show error message
+      setErrorMessage("You need to wait before making another move.");
+    } else if (!grid[row][col]) {
       setSelectedCell({ row, col }); // Store clicked cell coordinates
       setShowPopup(true); // Show popup
     }
   };
 
   const handleCharacterSubmit = (char: string) => {
-    if (selectedCell && ws.current) {
+    if (selectedCell && ws.current && playerId.current) {
       const { row, col } = selectedCell;
 
-      // Send the cell update to the server
+      // Send the cell update to the server, including the playerId
       ws.current.send(
         JSON.stringify({
           type: "updateCell",
           row,
           col,
           char,
+          playerId: playerId.current,
         })
       );
+
+      // Start the cooldown timer
+      setCooldownTime(60); // 60 seconds cooldown
 
       setSelectedCell(null); // Reset selected cell
     }
     setShowPopup(false); // Close popup
+    setErrorMessage(null); // Reset error message after submission
   };
 
   return (
@@ -68,7 +102,16 @@ const GameWrapper: React.FC = () => {
       <h1 className="text-6xl font-pixel-bold text-center mb-4">
         Multiplayer Grid Game
       </h1>
-      <p className="text-lg">Online Players: {onlinePlayers}</p>{" "}
+      <p className="text-lg">Online Players: {onlinePlayers}</p>
+      {cooldownTime > 0 && errorMessage && (
+        <p className="text-red-error mt-2">{errorMessage}</p>
+      )}{" "}
+      {/* Show error message */}
+      {cooldownTime > 0 && (
+        <p className="text-lg text-red-500">
+          Cooldown: {cooldownTime} seconds left
+        </p>
+      )}
       <Grid grid={grid} handleCellClick={handleCellClick} />
       {showPopup && (
         <CharacterInputPopup
