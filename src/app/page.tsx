@@ -1,4 +1,4 @@
-import Link from "next/link"; // Import Link from Next.js
+import Link from "next/link";
 
 export default function HomePage() {
   return (

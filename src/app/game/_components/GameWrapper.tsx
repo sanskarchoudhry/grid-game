@@ -20,7 +20,7 @@ const GameWrapper: React.FC = () => {
   const playerId = useRef<string | null>(null); // Player ID
 
   useEffect(() => {
-    // Generate a unique playerId for the user (you could also use a random value or session data)
+    // Generate a unique playerId for the user
     playerId.current = Math.random().toString(36).substr(2, 9);
 
     // Establish WebSocket connection

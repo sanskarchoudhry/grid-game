@@ -18,7 +18,7 @@ const CharacterInputPopup: React.FC<CharacterInputPopupProps> = ({
     e.preventDefault();
     if (inputValue.trim()) {
       onSubmit(inputValue);
-      setInputValue(""); // Clear input
+      setInputValue("");
     } else {
       setErrorMessage("*Input cannot be empty");
     }
