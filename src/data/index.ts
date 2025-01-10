@@ -23,12 +23,12 @@ export const instructionData = [
   {
     title: "Rules",
     instruction: [
-      {
-        instructionTitle: "One Submission:",
-        instructions: [
-          "You can only submit one character until further updates. ",
-        ],
-      },
+      // {
+      //   instructionTitle: "One Submission:",
+      //   instructions: [
+      //     "You can only submit one character until further updates. ",
+      //   ],
+      // },
       {
         instructionTitle: "No Retakes:",
         instructions: [
